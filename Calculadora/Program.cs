@@ -2,88 +2,75 @@
 
 namespace CalculadoraApp
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-            var calculadora = new Calculadora();
+            ExecutarCalculadora();
+        }
 
-            Console.WriteLine("Calculadora de Console");
-            Console.WriteLine("Escolha uma operação:");
-            Console.WriteLine("1 - Adição");
-            Console.WriteLine("2 - Subtração");
-            Console.WriteLine("3 - Multiplicação");
-            Console.WriteLine("4 - Divisão");
-            Console.WriteLine("5 - Sair");
+        public static void ExecutarCalculadora()
+        {
+            var calculadora = new Calculadora();
 
             bool continuar = true;
 
             while (continuar)
             {
-                Console.Write("\nEscolha uma opção (1-5): ");
+                Console.WriteLine("Escolha uma operação:");
+                Console.WriteLine("1. Somar");
+                Console.WriteLine("2. Subtrair");
+                Console.WriteLine("3. Multiplicar");
+                Console.WriteLine("4. Dividir");
+                Console.WriteLine("5. Sair");
+
+                Console.Write("Digite a opção: ");
                 string opcao = Console.ReadLine();
 
-                switch (opcao)
+                if (opcao == "5")
                 {
-                    case "1":
-                        RealizarOperacao(calculadora, "Adição");
-                        break;
-                    case "2":
-                        RealizarOperacao(calculadora, "Subtração");
-                        break;
-                    case "3":
-                        RealizarOperacao(calculadora, "Multiplicação");
-                        break;
-                    case "4":
-                        RealizarOperacao(calculadora, "Divisão");
-                        break;
-                    case "5":
-                        continuar = false;
-                        break;
-                    default:
-                        Console.WriteLine("Opção inválida. Tente novamente.");
-                        break;
+                    Console.WriteLine("Encerrando o programa...");
+                    continuar = false;
+                }
+                else
+                {
+                    Console.Write("Digite o primeiro número: ");
+                    if (!long.TryParse(Console.ReadLine(), out long num1))
+                    {
+                        Console.WriteLine("Entrada inválida!");
+                        continue;
+                    }
+
+                    Console.Write("Digite o segundo número: ");
+                    if (!long.TryParse(Console.ReadLine(), out long num2))
+                    {
+                        Console.WriteLine("Entrada inválida!");
+                        continue;
+                    }
+
+                    string resultado = Calcular(opcao, num1, num2);
+                    Console.WriteLine(resultado);
                 }
             }
-
-            Console.WriteLine("Obrigado por usar a calculadora!");
         }
 
-        static void RealizarOperacao(Calculadora calculadora, string operacao)
+        public static string Calcular(string opcao, long num1, long num2)
         {
-            Console.WriteLine($"Você escolheu {operacao}");
-
-            Console.Write("Digite o primeiro número: ");
-            long num1 = long.Parse(Console.ReadLine());
-
-            Console.Write("Digite o segundo número: ");
-            long num2 = long.Parse(Console.ReadLine());
-
-            decimal resultado = 0;
-
+            var calculadora = new Calculadora();
             try
             {
-                switch (operacao)
+                return opcao switch
                 {
-                    case "Adição":
-                        resultado = calculadora.Somar(num1, num2);
-                        break;
-                    case "Subtração":
-                        resultado = calculadora.Subtrair(num1, num2);
-                        break;
-                    case "Multiplicação":
-                        resultado = calculadora.Multiplicar(num1, num2);
-                        break;
-                    case "Divisão":
-                        resultado = calculadora.Dividir(num1, num2);
-                        break;
-                }
-
-                Console.WriteLine($"Resultado: {resultado}\n");
+                    "1" => $"Resultado: {calculadora.Somar(num1, num2)}",
+                    "2" => $"Resultado: {calculadora.Subtrair(num1, num2)}",
+                    "3" => $"Resultado: {calculadora.Multiplicar(num1, num2)}",
+                    "4" => $"Resultado: {calculadora.Dividir(num1, num2)}",
+                    _ => "Opção inválida."
+                };
             }
-            catch (DivideByZeroException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                return $"Erro: {ex.Message}";
             }
         }
     }
