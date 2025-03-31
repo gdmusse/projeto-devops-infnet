@@ -20,7 +20,7 @@
         public decimal Dividir(long a, long b)
         {
             if (b == 0)
-                throw new DivideByZeroException("Não é possível dividir por zero.");
+                throw new DivideByZeroException("Nao eh possivel dividir por zero.");
             return (decimal)a / b;
         }
     }
