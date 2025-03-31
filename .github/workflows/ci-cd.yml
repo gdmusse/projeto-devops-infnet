@@ -11,7 +11,7 @@ on:
 jobs:
   build-test:
     name: Build e Testes
-    runs-on: self-hosted
+    runs-on: self-hosted 
 
     steps:
       - name: Checkout do código
@@ -21,6 +21,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
+          install-dir: C:\dotnet
 
       - name: Restaurar dependências
         run: dotnet restore

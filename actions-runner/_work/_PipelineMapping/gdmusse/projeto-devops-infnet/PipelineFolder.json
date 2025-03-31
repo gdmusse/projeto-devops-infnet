@@ -1,0 +1,12 @@
+﻿{
+  "repositoryName": "gdmusse/projeto-devops-infnet",
+  "pipelineDirectory": "projeto-devops-infnet",
+  "workspaceDirectory": "projeto-devops-infnet\\projeto-devops-infnet",
+  "repositories": {
+    "gdmusse/projeto-devops-infnet": {
+      "repositoryPath": "projeto-devops-infnet\\projeto-devops-infnet",
+      "lastRunOn": "03/31/2025 13:59:02 -03:00"
+    }
+  },
+  "lastRunOn": "03/31/2025 13:59:02 -03:00"
+}
