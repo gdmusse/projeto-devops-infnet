@@ -10,7 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2CEAD6BE-97CE-462D-80FF-9E8D8E777B1B}"
 	ProjectSection(SolutionItems) = preProject
 		Dockerfile = Dockerfile
-		Jenkinsfile = Jenkinsfile
+		..\..\..\Downloads\Aula02-Codigos\CI-CD\calculadoraJenkins\Jenkinsfile = ..\..\..\Downloads\Aula02-Codigos\CI-CD\calculadoraJenkins\Jenkinsfile
 	EndProjectSection
 EndProject
 Global
