@@ -113,7 +113,9 @@ public class CalculadoraTests
     [Fact]
     public void DeveLancarExcecao_QuandoDividirPorZero()
     {
-        Assert.Throws<DivideByZeroException>(() => _calculadora.Dividir(5, 0));
+        var ex = Assert.Throws<DivideByZeroException>(() => _calculadora.Dividir(5, 0));
+
+        Assert.Equal("Nao eh possivel dividir por zero.", ex.Message);
     }
 
     [Fact]
