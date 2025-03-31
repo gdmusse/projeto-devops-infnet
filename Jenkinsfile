@@ -4,7 +4,7 @@
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/seuusuario/seurepositorio.git'
+                git 'https://github.com/gdmusse/projeto-devops-infnet.git'
             }
         }
         stage('Build') {
