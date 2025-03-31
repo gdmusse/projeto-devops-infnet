@@ -11,7 +11,7 @@ on:
 jobs:
   build-test:
     name: Build e Testes
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout do código
@@ -34,7 +34,7 @@ jobs:
   docker:
     name: Criar e enviar imagem Docker
     needs: build-test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted 
 
     steps:
       - name: Checkout do código
