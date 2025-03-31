@@ -8,10 +8,16 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/gdmusse/projeto-devops-infnet.git'
+            }
+        }
+
         stage('Instalar Dependências') {
             steps {
                 script {
-                    sh 'dotnet restore'
+                    bat 'dotnet restore'
                 }
             }
         }
@@ -19,7 +25,14 @@ pipeline {
         stage('Executar Testes') {
             steps {
                 script {
-                    sh 'dotnet test --logger trx --results-directory TestResults'
+                    bat 'dotnet test --logger trx --results-directory TestResults'
+                }
+            }
+            post {
+                always {
+                    script {
+                        junit 'TestResults/*.trx'  // Gera relatório no Jenkins
+                    }
                 }
             }
         }
@@ -28,7 +41,6 @@ pipeline {
             steps {
                 script {
                     echo "Compilando, testando e empacotando a aplicação..."
-                    //sh 'docker build -t $APP_NAME:$BRANCH_NAME-$BUILD_NUMBER . --no-cache'  // Exemplo de comando para compilar uma aplicação Dotnet
                     app = docker.build("${env.IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_ID}", '.')
                 }
             }
@@ -37,13 +49,11 @@ pipeline {
         stage('Docker image push') {
             steps {
                 script {
-                    /* Push image using withRegistry. */
                     docker.withRegistry('https://registry.hub.docker.com/', 'dockerhub') {
                         app.push("${env.BUILD_ID}")
                         app.push('latest')
                     }
                 }
-            
             }
         }
 
@@ -52,16 +62,15 @@ pipeline {
                 script {
                     echo "🚀 Realizando o deploy..."
 
-                    // Força parar o container antigo se ele existir
+                    // Para o container antigo se ele existir
                     try {
-                        sh "docker rm -f ${env.APP_NAME}-${env.BRANCH_NAME} || true"
+                        bat "docker rm -f ${env.APP_NAME}-${env.BRANCH_NAME} || true"
                     } catch (Exception e) {
                         echo "Nenhum container antigo rodando. Vamos seguir com o deploy novo!"
                     }
 
                     // Roda o novo container
                     docker.image("${env.IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_ID}").run("--name ${env.APP_NAME}-${env.BRANCH_NAME}")
-
 
                     echo "✅ Deploy finalizado com sucesso!"
                 }
