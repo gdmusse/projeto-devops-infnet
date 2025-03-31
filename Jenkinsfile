@@ -7,6 +7,22 @@ pipeline {
         BRANCH_NAME = GIT_BRANCH.replaceFirst(/^origin\//, '')
     }
 
+    stage('Instalar Dependências') {
+            steps {
+                script {
+                    sh 'dotnet restore'
+                }
+            }
+        }
+
+        stage('Executar Testes') {
+            steps {
+                script {
+                    sh 'dotnet test --logger trx --results-directory TestResults'
+                }
+            }
+        }
+
     stages {
         stage('Build, testando e empacotando') {
             steps {
