@@ -4,20 +4,16 @@
     environment {
         APP_NAME    = "calculadora"
         IMAGE_NAME  = "gdmusse/${env.APP_NAME}"
+        BRANCH_NAME = GIT_BRANCH.replaceFirst(/^origin\//, '')
     }
 
-    options {
-        // Keep only the last 5 builds and delete the older ones
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-    }
-
+    stages {
         stage('Build, testando e empacotando') {
             steps {
                 script {
                     echo "Compilando, testando e empacotando a aplicação..."
                     //sh 'docker build -t $APP_NAME:$BRANCH_NAME-$BUILD_NUMBER . --no-cache'  // Exemplo de comando para compilar uma aplicação Dotnet
-                    
-                    app = docker.build("${env.IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_ID}", "--build-arg data1=${env.data1} --build-arg data2=${env.data2} . --no-cache --progress=plain")
+                    app = docker.build("${env.IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_ID}", '.')
                 }
             }
         }
@@ -64,5 +60,5 @@
         failure {
             echo "Pipeline falhou!"
         }
-    }  
+    }
 }
