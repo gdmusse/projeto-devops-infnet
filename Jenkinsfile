@@ -7,7 +7,8 @@ pipeline {
         BRANCH_NAME = GIT_BRANCH.replaceFirst(/^origin\//, '')
     }
 
-    stage('Instalar Dependências') {
+    stages {
+        stage('Instalar Dependências') {
             steps {
                 script {
                     sh 'dotnet restore'
@@ -23,7 +24,6 @@ pipeline {
             }
         }
 
-    stages {
         stage('Build, testando e empacotando') {
             steps {
                 script {
