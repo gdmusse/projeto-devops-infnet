@@ -123,7 +123,7 @@ namespace CalculadoraTests
             var calculadora = new Calculadora();
             var ex = Assert.Throws<DivideByZeroException>(() => calculadora.Dividir(10, 0));
 
-            Assert.Equal("Não é possível dividir por zero.", ex.Message);
+            Assert.Equal("Nao eh possivel dividir por zero.", ex.Message);
         }
 
         [Fact]
