@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME    = "Calculadora"
+        APP_NAME    = "calculadora"
         IMAGE_NAME  = "gdmusse/${env.APP_NAME}"
         BRANCH_NAME = GIT_BRANCH.replaceFirst(/^origin\//, '')
     }
