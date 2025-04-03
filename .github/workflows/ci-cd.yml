@@ -28,38 +28,36 @@ jobs:
       - name: Build do projeto
         run: dotnet build --configuration Release --no-restore
 
-      - name: Test with Coverlet
-        run: dotnet test CalculadoraTests/CalculadoraTests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+      - name: Executar testes com cobertura
+        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --collect:"XPlat Code Coverage"
 
-      - name: Debug All TestResults
-        run: find . -type f -name "*.xml"
-
-      - name: Install ReportGenerator
+      - name: Instalar ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
-      - name: Generate HTML report
+      - name: Gerar relatório de cobertura
         run: |
-          reportgenerator -reports:CalculadoraTests/coverage.xml -targetdir:coveragereport -reporttypes:Html
+          reportgenerator -reports:CalculadoraTests/TestResults/*/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Html
 
-      - name: Upload report
+      - name: Upload do relatório
         uses: actions/upload-artifact@v4
         with:
           name: CodeCoverageReport
           path: coveragereport
 
-      - name: Coverage and publish on summary
+      - name: Publicar cobertura no resumo do workflow
         run: |
-          COVERAGE_FILE="CalculadoraTests/coverage.xml"
-          if [[ ! -f "$COVERAGE_FILE" ]]; then
+          COVERAGE_FILE=$(find CalculadoraTests/TestResults -name "coverage.cobertura.xml" | head -n 1)
+          if [[ -z "$COVERAGE_FILE" ]]; then
             echo "Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
           TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "$COVERAGE_FILE" | head -n 1)
+
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
           echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
-          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
+          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: 80%" >> $GITHUB_STEP_SUMMARY
 
           if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
             echo "A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
