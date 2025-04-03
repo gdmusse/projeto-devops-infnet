@@ -57,24 +57,27 @@ jobs:
 
       - name: Exibir cobertura no resumo
         run: |
-          set -e  # Faz o script falhar imediatamente se qualquer comando falhar
+          set -e
 
           echo "🔍 Debug - Caminho do arquivo de cobertura: '${COVERAGE_FILE}'"
           
-          # Verifica se o arquivo realmente existe
           if [[ -f "$COVERAGE_FILE" ]]; then
             echo "✅ O arquivo existe: $COVERAGE_FILE"
           else
             echo "❌ Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
-            ls -l CalculadoraTests/TestResults  # Lista arquivos na pasta para depuração
+            ls -l CalculadoraTests/TestResults
             exit 1
           fi
 
           TOTAL_COVERAGE=$(grep -oP "(?<=line-rate=\")[0-9.]+" "$COVERAGE_FILE" | head -n 1)
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
+          echo "📝 Criando o resumo no GITHUB_STEP_SUMMARY..."
           echo "### 📊 Relatório de Cobertura de Código" >> $GITHUB_STEP_SUMMARY
-          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
+          echo "**Cobertura Total:** ${TOTAL_COVERAGE_PERCENT}% - Meta: 80%" >> $GITHUB_STEP_SUMMARY
+
+          echo "📂 Debug: Conteúdo do GITHUB_STEP_SUMMARY"
+          cat $GITHUB_STEP_SUMMARY
 
           if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
             echo "⚠️ A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
@@ -83,7 +86,6 @@ jobs:
         shell: bash
         env:
           COVERAGE_FILE: ${{ env.COVERAGE_FILE }}
-
 
   docker:
     name: Criar e enviar imagem Docker
