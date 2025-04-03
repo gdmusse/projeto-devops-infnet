@@ -28,38 +28,40 @@ jobs:
       - name: Build do projeto
         run: dotnet build --configuration Release --no-restore
 
-      - name: Executar testes com cobertura
-        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --collect:"XPlat Code Coverage"
+      - name: Executar testes e coletar cobertura
+        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --no-build --collect:"XPlat Code Coverage"
+
+      - name: Definir variável COVERAGE_FILE
+        run: echo "COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name 'coverage.cobertura.xml' | head -n 1)" >> $GITHUB_ENV
+
+      - name: Debug - Exibir caminho do arquivo de cobertura
+        run: echo "Arquivo de cobertura encontrado: ${{ env.COVERAGE_FILE }}"
 
       - name: Instalar ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Gerar relatório de cobertura
         run: |
-          COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
-          reportgenerator -reports:$COVERAGE_FILE -targetdir:coveragereport -reporttypes:Html
+          if [ -z "${{ env.COVERAGE_FILE }}" ]; then
+            echo "❌ Arquivo de cobertura não encontrado!"
+            exit 1
+          fi
+          reportgenerator -reports:${{ env.COVERAGE_FILE }} -targetdir:coveragereport -reporttypes:Html
 
-      - name: Upload do relatório
+      - name: Upload do relatório de cobertura
         uses: actions/upload-artifact@v4
         with:
           name: CodeCoverageReport
           path: coveragereport
 
-      - name: Debug - Exibir caminho do arquivo de cobertura
-        run: |
-          COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
-          echo "Arquivo encontrado: $COVERAGE_FILE"
-
       - name: Exibir cobertura no resumo
         run: |
-          COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
-          
-          if [[ -z "$COVERAGE_FILE" ]]; then
+          if [ -z "${{ env.COVERAGE_FILE }}" ]; then
             echo "❌ Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
-          TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "$COVERAGE_FILE" | head -n 1)
+          TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "${{ env.COVERAGE_FILE }}" | head -n 1)
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
           echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
