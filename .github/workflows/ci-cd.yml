@@ -28,8 +28,64 @@ jobs:
       - name: Build do projeto
         run: dotnet build --configuration Release --no-restore
 
-      - name: Executar testes
-        run: dotnet test --configuration Release --no-restore --logger trx --results-directory TestResults
+      - name: Executar testes e coletar cobertura
+        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --collect:"XPlat Code Coverage"
+
+      - name: Definir variável COVERAGE_FILE
+        run: echo "COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name 'coverage.cobertura.xml' | head -n 1)" >> $GITHUB_ENV
+
+      - name: Debug - Exibir caminho do arquivo de cobertura
+        run: |
+          echo "Arquivo de cobertura encontrado: '${{ env.COVERAGE_FILE }}'"
+
+      - name: Instalar ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Gerar relatório de cobertura
+        run: |
+          if [ -z "${{ env.COVERAGE_FILE }}" ]; then
+            echo "❌ Arquivo de cobertura não encontrado!"
+            exit 1
+          fi
+          reportgenerator -reports:${{ env.COVERAGE_FILE }} -targetdir:coveragereport -reporttypes:Html
+
+      - name: Upload do relatório de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeCoverageReport
+          path: coveragereport
+
+      - name: Exibir cobertura no resumo
+        run: |
+          set -e
+
+          echo "🔍 Debug - Caminho do arquivo de cobertura: '${COVERAGE_FILE}'"
+          
+          if [[ -f "$COVERAGE_FILE" ]]; then
+            echo "✅ O arquivo existe: $COVERAGE_FILE"
+          else
+            echo "❌ Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
+            ls -l CalculadoraTests/TestResults
+            exit 1
+          fi
+
+          TOTAL_COVERAGE=$(grep -oP "(?<=line-rate=\")[0-9.]+" "$COVERAGE_FILE" | head -n 1)
+          TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
+
+          echo "📝 Criando o resumo no GITHUB_STEP_SUMMARY..."
+          echo "📊 Relatório de Cobertura de Código" >> $GITHUB_STEP_SUMMARY
+          echo "Cobertura Total: ${TOTAL_COVERAGE_PERCENT}% - Meta: 80%" >> $GITHUB_STEP_SUMMARY
+
+          echo "📂 Debug: Conteúdo do GITHUB_STEP_SUMMARY"
+          cat $GITHUB_STEP_SUMMARY
+
+          if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
+            echo "⚠️ A cobertura está abaixo da meta definida!" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+        shell: bash
+        env:
+          COVERAGE_FILE: ${{ env.COVERAGE_FILE }}
 
   docker:
     name: Criar e enviar imagem Docker

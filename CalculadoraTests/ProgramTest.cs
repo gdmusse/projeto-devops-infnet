@@ -4,7 +4,7 @@ using Xunit;
 
 namespace CalculadoraApp.Tests
 {
-    public class ProgramTests
+    public class ProgramTest
     {
         [Fact]
         public void DeveRetornarSomaCorreta()
