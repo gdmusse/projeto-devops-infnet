@@ -29,8 +29,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --no-build --collect:"XPlat Code Coverage"
-        working-directory: CalculadoraTests
+        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --no-build --collect:"XPlat Code Coverage"
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
