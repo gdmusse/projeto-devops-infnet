@@ -57,11 +57,16 @@ jobs:
 
       - name: Exibir cobertura no resumo
         run: |
-          echo "🔍 Debug - Caminho do arquivo de cobertura: '${COVERAGE_FILE}'"
+          set -e  # Faz o script falhar imediatamente se qualquer comando falhar
 
-          # Verifica se a variável está vazia ou se o arquivo não existe
-          if [[ -z "$COVERAGE_FILE" || ! -f "$COVERAGE_FILE" ]]; then
-            echo "❌ Arquivo de cobertura não encontrado ou inválido!" >> $GITHUB_STEP_SUMMARY
+          echo "🔍 Debug - Caminho do arquivo de cobertura: '${COVERAGE_FILE}'"
+          
+          # Verifica se o arquivo realmente existe
+          if [[ -f "$COVERAGE_FILE" ]]; then
+            echo "✅ O arquivo existe: $COVERAGE_FILE"
+          else
+            echo "❌ Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
+            ls -l CalculadoraTests/TestResults  # Lista arquivos na pasta para depuração
             exit 1
           fi
 
@@ -75,8 +80,10 @@ jobs:
             echo "⚠️ A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
+        shell: bash
         env:
           COVERAGE_FILE: ${{ env.COVERAGE_FILE }}
+
 
   docker:
     name: Criar e enviar imagem Docker
