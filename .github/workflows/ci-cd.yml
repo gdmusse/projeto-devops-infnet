@@ -30,7 +30,7 @@ jobs:
 
       - name: Test
         run: dotnet test --no-build --collect:"XPlat Code Coverage"
-        working-directory: SimuladorAppTests
+        working-directory: Calculadora.Tests
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
@@ -47,7 +47,7 @@ jobs:
 
       - name: Coverage and publish on summary
         run: |
-          COVERAGE_FILE=$(find SimuladorAppTests/TestResults -name "coverage.cobertura.xml" | head -n 1)
+          COVERAGE_FILE=$(find Calculadora.Tests/TestResults -name "coverage.cobertura.xml" | head -n 1)
           if [[ -z "$COVERAGE_FILE" ]]; then
             echo "Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
             exit 1
