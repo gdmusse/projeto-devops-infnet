@@ -29,7 +29,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Executar testes e coletar cobertura
-        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --no-build --collect:"XPlat Code Coverage"
+        run: dotnet test CalculadoraTests/CalculadoraTests.csproj --collect:"XPlat Code Coverage"
 
       - name: Definir variável COVERAGE_FILE
         run: echo "COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name 'coverage.cobertura.xml' | head -n 1)" >> $GITHUB_ENV
