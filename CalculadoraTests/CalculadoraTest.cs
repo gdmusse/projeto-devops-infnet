@@ -1,11 +1,11 @@
 using CalculadoraApp;
 
 namespace CalculadoraApp.Tests {
-    public class CalculadoraTests
+    public class CalculadoraTest
     {
         private Calculadora _calculadora;
 
-        public CalculadoraTests()
+        public CalculadoraTest()
         {
             _calculadora = new Calculadora();
         }
