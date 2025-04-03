@@ -54,7 +54,6 @@ jobs:
         with:
           name: CodeCoverageReport
           path: coveragereport
-
       - name: Exibir cobertura no resumo
         run: |
           if [ -z "${{ env.COVERAGE_FILE }}" ]; then
@@ -62,13 +61,31 @@ jobs:
             exit 1
           fi
 
+          # Extrai a cobertura total do XML
           TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "${{ env.COVERAGE_FILE }}" | head -n 1)
+
+          # Se a cobertura não for encontrada, falha o job
+          if [ -z "$TOTAL_COVERAGE" ]; then
+            echo "❌ Não foi possível extrair a cobertura do XML!" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          # Instala bc se necessário
+          sudo apt-get update && sudo apt-get install -y bc
+
+          # Converte a cobertura para percentual
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
           echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
-          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
+          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: $80%" >> $GITHUB_STEP_SUMMARY
 
-          if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
+          # Compara a cobertura com a meta
+          META=${META:-80}
+
+          # Usa awk para comparação de valores float
+          RESULT=$(awk -v a="$TOTAL_COVERAGE_PERCENT" -v b="$META" 'BEGIN {print (a < b) ? 1 : 0}')
+          
+          if [ "$RESULT" -eq 1 ]; then
             echo "⚠️ A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
