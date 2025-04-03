@@ -57,40 +57,23 @@ jobs:
 
       - name: Exibir cobertura no resumo
         run: |
-          if [ -z "${COVERAGE_FILE}" ]; then
-            echo "❌ Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
+          echo "🔍 Debug - Caminho do arquivo de cobertura: '${{ env.COVERAGE_FILE }}'"
+
+          if [ -z "${{ env.COVERAGE_FILE }}" ] || [ ! -f "${{ env.COVERAGE_FILE }}" ]; then
+            echo "❌ Arquivo de cobertura não encontrado ou inválido!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
-          # Extrai a cobertura total do XML
-          TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "${COVERAGE_FILE}" | head -n 1)
-
-          # Se a cobertura não for encontrada, falha o job
-          if [ -z "$TOTAL_COVERAGE" ]; then
-            echo "❌ Não foi possível extrair a cobertura do XML!" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
-          # Converte a cobertura para percentual
+          TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "${{ env.COVERAGE_FILE }}" | head -n 1)
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
           echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
           echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
 
-          # Compara a cobertura com a meta
-          META=${{ secrets.COVERAGE_PERCENT }}
-          META=${META:-80} # Se não houver variável COVERAGE_PERCENT, usa 80% como padrão
-
-          # Usa awk para comparação de valores float
-          RESULT=$(awk -v a="$TOTAL_COVERAGE_PERCENT" -v b="$META" 'BEGIN {print (a < b) ? 1 : 0}')
-          
-          if [ "$RESULT" -eq 1 ]; then
+          if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
             echo "⚠️ A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-        env:
-          COVERAGE_FILE: ${{ env.COVERAGE_FILE }}
-
 
   docker:
     name: Criar e enviar imagem Docker
