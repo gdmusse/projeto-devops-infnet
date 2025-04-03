@@ -44,6 +44,9 @@ jobs:
           name: CodeCoverageReport
           path: coveragereport
 
+      - name: Debug - Listar arquivos de cobertura
+        run: find CalculadoraTests/TestResults -type f
+
       - name: Exibir cobertura no resumo
         run: |
           COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
