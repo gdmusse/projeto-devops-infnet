@@ -31,12 +31,15 @@ jobs:
       - name: Test with Coverlet
         run: dotnet test CalculadoraTests/CalculadoraTests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 
+      - name: Debug Coverage Files
+        run: find . -name "coverage.xml"
+
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Generate HTML report
         run: |
-          reportgenerator -reports:**/TestResults/*/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Html
+          reportgenerator -reports:CalculadoraTests/coverage.xml -targetdir:coveragereport -reporttypes:Html
 
       - name: Upload report
         uses: actions/upload-artifact@v4
@@ -46,14 +49,13 @@ jobs:
 
       - name: Coverage and publish on summary
         run: |
-          COVERAGE_FILE=$(find CalculadoraTests/TestResults -name "coverage.cobertura.xml" | head -n 1)
-          if [[ -z "$COVERAGE_FILE" ]]; then
+          COVERAGE_FILE="CalculadoraTests/coverage.xml"
+          if [[ ! -f "$COVERAGE_FILE" ]]; then
             echo "Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
           TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "$COVERAGE_FILE" | head -n 1)
-
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
           echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
