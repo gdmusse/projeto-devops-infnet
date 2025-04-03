@@ -72,15 +72,11 @@ jobs:
           TOTAL_COVERAGE=$(grep -oP "(?<=line-rate=\")[0-9.]+" "$COVERAGE_FILE" | head -n 1)
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
-          echo "📝 Criando o resumo no GITHUB_STEP_SUMMARY..."
-          echo "### 📊 Relatório de Cobertura de Código" >> $GITHUB_STEP_SUMMARY
-          echo "**Cobertura Total:** ${TOTAL_COVERAGE_PERCENT}% - Meta: 80%" >> $GITHUB_STEP_SUMMARY
-
-          echo "📂 Debug: Conteúdo do GITHUB_STEP_SUMMARY"
-          cat $GITHUB_STEP_SUMMARY
+          echo "📊 Relatório de Cobertura de Código" >> $GITHUB_STEP_SUMMARY
+          echo "Cobertura Total: ${TOTAL_COVERAGE_PERCENT}% - Meta: 80%" >> $GITHUB_STEP_SUMMARY
 
           if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
-            echo "⚠️ A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ A cobertura não está coerente com a meta definida!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
         shell: bash
