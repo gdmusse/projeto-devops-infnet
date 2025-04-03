@@ -35,7 +35,8 @@ jobs:
         run: echo "COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name 'coverage.cobertura.xml' | head -n 1)" >> $GITHUB_ENV
 
       - name: Debug - Exibir caminho do arquivo de cobertura
-        run: echo "Arquivo de cobertura encontrado: ${{ env.COVERAGE_FILE }}"
+        run: |
+          echo "Arquivo de cobertura encontrado: '${{ env.COVERAGE_FILE }}'"
 
       - name: Instalar ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
