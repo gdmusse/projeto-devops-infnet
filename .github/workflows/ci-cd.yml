@@ -36,7 +36,8 @@ jobs:
 
       - name: Gerar relatório de cobertura
         run: |
-          reportgenerator -reports:$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1) -targetdir:coveragereport -reporttypes:Html
+          COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
+          reportgenerator -reports:$COVERAGE_FILE -targetdir:coveragereport -reporttypes:Html
 
       - name: Upload do relatório
         uses: actions/upload-artifact@v4
@@ -44,15 +45,12 @@ jobs:
           name: CodeCoverageReport
           path: coveragereport
 
-      - name: Debug - Listar todos os arquivos gerados na pasta TestResults
-        run: find CalculadoraTests/TestResults -type f
-
       - name: Exibir cobertura no resumo
         run: |
           COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
           
           if [[ -z "$COVERAGE_FILE" ]]; then
-            echo "Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
@@ -63,10 +61,9 @@ jobs:
           echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
 
           if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
-            echo "A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-
 
   docker:
     name: Criar e enviar imagem Docker
