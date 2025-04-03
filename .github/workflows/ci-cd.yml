@@ -59,7 +59,8 @@ jobs:
         run: |
           echo "🔍 Debug - Caminho do arquivo de cobertura: '${{ env.COVERAGE_FILE }}'"
 
-          if [ -z "${{ env.COVERAGE_FILE }}" ] || [ ! -f "${{ env.COVERAGE_FILE }}" ]; then
+          # Verifica se a variável está vazia ou se o arquivo não existe
+          if [[ -z "${{ env.COVERAGE_FILE }}" || ! -f "${{ env.COVERAGE_FILE }}" ]]; then
             echo "❌ Arquivo de cobertura não encontrado ou inválido!" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
