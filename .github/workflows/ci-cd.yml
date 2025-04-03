@@ -28,8 +28,42 @@ jobs:
       - name: Build do projeto
         run: dotnet build --configuration Release --no-restore
 
-      - name: Executar testes
-        run: dotnet test --configuration Release --no-restore --logger trx --results-directory TestResults
+      - name: Test
+        run: dotnet test --no-build --collect:"XPlat Code Coverage"
+        working-directory: SimuladorAppTests
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Generate HTML report
+        run: |
+          reportgenerator -reports:**/TestResults/*/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Html
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeCoverageReport
+          path: coveragereport
+
+      - name: Coverage and publish on summary
+        run: |
+          COVERAGE_FILE=$(find SimuladorAppTests/TestResults -name "coverage.cobertura.xml" | head -n 1)
+          if [[ -z "$COVERAGE_FILE" ]]; then
+            echo "Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          TOTAL_COVERAGE=$(grep -oP '(?<=line-rate=")[0-9.]+' "$COVERAGE_FILE" | head -n 1)
+
+          TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
+
+          echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
+          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
+
+          if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
+            echo "A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
   docker:
     name: Criar e enviar imagem Docker
