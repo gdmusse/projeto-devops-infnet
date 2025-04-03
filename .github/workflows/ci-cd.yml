@@ -38,19 +38,15 @@ jobs:
         run: |
           reportgenerator -reports:CalculadoraTests/TestResults/*/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Html
 
-      - name: Depuração - Listar arquivos gerados
-        run: find . -type f -name "*.xml"
-
-
       - name: Upload do relatório
         uses: actions/upload-artifact@v4
         with:
           name: CodeCoverageReport
           path: coveragereport
 
-      - name: Publicar cobertura no resumo do workflow
+      - name: Exibir cobertura no resumo
         run: |
-          COVERAGE_FILE=$(find CalculadoraTests/TestResults -name "coverage.cobertura.xml" | head -n 1)
+          COVERAGE_FILE=$(find CalculadoraTests/TestResults -type f -name "coverage.cobertura.xml" | head -n 1)
           if [[ -z "$COVERAGE_FILE" ]]; then
             echo "Arquivo de cobertura não encontrado!" >> $GITHUB_STEP_SUMMARY
             exit 1
@@ -61,7 +57,7 @@ jobs:
           TOTAL_COVERAGE_PERCENT=$(echo "$TOTAL_COVERAGE * 100" | bc)
 
           echo '### 📊 Relatório de Cobertura de Código' >> $GITHUB_STEP_SUMMARY
-          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: 80%" >> $GITHUB_STEP_SUMMARY
+          echo "**Cobertura Total:** $TOTAL_COVERAGE_PERCENT% - Meta: ${{ secrets.COVERAGE_PERCENT }}%" >> $GITHUB_STEP_SUMMARY
 
           if (( $(echo "$TOTAL_COVERAGE_PERCENT < 80" | bc -l) )); then
             echo "A cobertura está abaixo da meta! Para mais informações, baixe o report." >> $GITHUB_STEP_SUMMARY
