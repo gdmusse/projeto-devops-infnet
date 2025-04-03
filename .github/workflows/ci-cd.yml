@@ -31,8 +31,8 @@ jobs:
       - name: Test with Coverlet
         run: dotnet test CalculadoraTests/CalculadoraTests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 
-      - name: Debug Coverage Files
-        run: find . -name "coverage.xml"
+      - name: Debug All TestResults
+        run: find . -type f -name "*.xml"
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
