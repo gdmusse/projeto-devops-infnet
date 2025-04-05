@@ -107,3 +107,8 @@ jobs:
 
       - name: Enviar imagem para Docker Hub
         run: docker push gdmusse/calculadora:latest
+
+      - name: Puxar e rodar a imagem por no máximo 2 segundos
+        run: |
+            docker pull gdmusse/calculadora:latest
+            timeout 2s docker run --rm gdmusse/calculadora:latest || echo "Finalizado com timeout"
