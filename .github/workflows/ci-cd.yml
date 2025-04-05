@@ -111,6 +111,6 @@ jobs:
       - name: Puxar e rodar a imagem
         run: |
           docker pull gdmusse/calculadora:latest
-          docker run --rm gdmusse/calculadora:latest timeout 120
+          docker run --rm gdmusse/calculadora:latest timeout 5
 
 
