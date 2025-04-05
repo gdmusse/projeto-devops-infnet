@@ -107,3 +107,8 @@ jobs:
 
       - name: Enviar imagem para Docker Hub
         run: docker push gdmusse/calculadora:latest
+
+      - name: Puxar e rodar a imagem
+        run: docker pull gdmusse/calculadora:latest
+             docker run -it gdmusse/calculadora:latest
+
